@@ -1,0 +1,58 @@
+rules_version = '2';
+
+// BHS Bites — Firestore security rules
+// Paste this whole file into: Firebase Console → Firestore Database → Rules → Publish
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // The one hard-coded admin account. Authorization checks below key off the
+    // *verified* email on the auth token (not a client-writable field), so a
+    // student cannot grant themselves admin by editing their own Firestore doc.
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.email == 'omrsiuomar@gmail.com';
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // ---------------- users/{uid} ----------------
+    // One doc per student (and the admin), created at signup.
+    match /users/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+
+      allow create: if isOwner(uid)
+        && request.resource.data.balance == 0
+        && request.resource.data.points == 0
+        && request.resource.data.role == (request.auth.token.email == 'omrsiuomar@gmail.com' ? 'admin' : 'student');
+
+      // Owner can update their own profile / balance / points (balance & points are only
+      // ever changed by the app's own order + top-up flows), but can never change their role.
+      allow update: if (isOwner(uid) && request.resource.data.role == resource.data.role) || isAdmin();
+
+      allow delete: if isAdmin();
+    }
+
+    // ---------------- orders/{orderId} ----------------
+    // A student can create their own orders; only the admin can read everyone's
+    // orders, change status, or delete.
+    match /orders/{orderId} {
+      allow create: if isOwner(request.resource.data.uid);
+      allow read: if isAdmin() || (isSignedIn() && resource.data.uid == request.auth.uid);
+      allow update, delete: if isAdmin();
+    }
+
+    // ---------------- topups/{id} ----------------
+    // Wallet top-up log, for audit purposes.
+    match /topups/{id} {
+      allow create: if isOwner(request.resource.data.uid);
+      allow read: if isAdmin() || (isSignedIn() && resource.data.uid == request.auth.uid);
+      allow update, delete: if isAdmin();
+    }
+  }
+}
