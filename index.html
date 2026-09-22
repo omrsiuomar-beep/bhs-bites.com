@@ -452,6 +452,11 @@
 
   ::selection{background:var(--orange);color:#fff;}
 </style>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="app-icon-192.png">
+<meta name="theme-color" content="#3B0919">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="BHS Bites">
 </head>
 <body>
 
@@ -1852,6 +1857,9 @@
   updateCrepe();
   updateIceCream();
 })();
+</script>
+<script>
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
 </script>
 </body>
 </html>
