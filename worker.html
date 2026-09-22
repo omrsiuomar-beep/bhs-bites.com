@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BHS Bites — Worker Orders</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#fff;--bg-soft:#fff8ef;--ink:#241f18;--ink-soft:#6e6355;--line:#ede5d8;
+    --orange:#ff5a36;--teal:#00a99d;--teal-ink:#00655d;--yellow:#ffb800;
+    --maroon:#3b0919;--cream:#fdf3d9;--gold:#fcd84b;--card:#fff;
+    --radius:18px;
+  }
+  @media(prefers-color-scheme:dark){
+    :root{--bg:#171310;--bg-soft:#1f1a15;--ink:#f4eee3;--ink-soft:#bdb09b;--line:#332b22;--card:#211b15;--teal-ink:#9fede6}
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif;line-height:1.5}
+  h1,h2,h3,.brand{font-family:Fredoka,system-ui,sans-serif;margin:0}
+  .wrap{max-width:1180px;margin:auto;padding:0 24px}
+  header{background:var(--maroon);color:var(--cream);padding:15px 0;position:sticky;top:0;z-index:5}
+  .nav{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .brand{font-size:21px;color:var(--cream);text-decoration:none}
+  .nav-right{display:flex;align-items:center;gap:14px;font-size:13px}
+  .who{color:rgba(253,243,217,.82)}
+  a{color:inherit}
+  .back{color:var(--gold);font-weight:700;text-decoration:none}
+  .btn{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:999px;padding:10px 18px;font:600 14px Fredoka,sans-serif;cursor:pointer}
+  .btn-primary{background:var(--orange);color:#fff}
+  .btn-outline{border:1px solid rgba(253,243,217,.4);background:transparent;color:var(--cream)}
+  main{padding:38px 0 80px}
+  .state{max-width:430px;margin:45px auto;background:var(--card);border:1px solid var(--line);border-radius:26px;padding:32px;text-align:center}
+  .state p,.sub{color:var(--ink-soft)}
+  .state p{font-size:14px;margin:9px 0 22px}
+  .auth-row{text-align:left;margin-bottom:14px}
+  label{display:block;color:var(--ink-soft);font-size:12px;font-weight:700;margin-bottom:6px}
+  input{width:100%;padding:12px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg-soft);color:var(--ink);font:14px Inter,sans-serif}
+  .error{display:none;background:#fff0eb;color:#b33a1f;border-radius:10px;padding:10px;text-align:left;font-size:13px;font-weight:700;margin-bottom:14px}
+  .error.show{display:block}
+  .heading{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:24px}
+  h1{font-size:clamp(30px,5vw,46px)}
+  .live{display:inline-flex;align-items:center;gap:8px;background:var(--bg-soft);border:1px solid var(--line);border-radius:999px;padding:8px 13px;font-size:12px;font-weight:700;color:var(--teal-ink)}
+  .live i{width:8px;height:8px;background:var(--teal);border-radius:50%;display:block}
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px}
+  .stat .label{color:var(--ink-soft);font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+  .stat strong{display:block;font:600 28px Fredoka,sans-serif;margin-top:4px}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:24px;margin-bottom:22px}
+  .panel h2{font-size:20px;margin-bottom:4px}
+  .sub{font-size:13px;margin-bottom:18px}
+  .notification-list{display:grid;gap:9px}
+  .notification{display:flex;justify-content:space-between;gap:16px;padding:12px 14px;background:var(--bg-soft);border:1px solid var(--line);border-radius:12px}
+  .notification strong,.notification small{display:block}
+  .notification small{color:var(--ink-soft);font-size:12px;margin-top:3px}
+  .empty{text-align:center;color:var(--ink-soft);padding:18px 0;font-size:14px}
+  .table-wrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;min-width:760px;font-size:14px}
+  th,td{text-align:left;padding:12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--ink-soft);font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+  tr:hover td{background:var(--bg-soft)}
+  .order-no{font:600 15px Fredoka,sans-serif;color:var(--orange)}
+  .recipient{font-weight:700}
+  .muted{color:var(--ink-soft);font-size:12px}
+  .status{border:1px solid var(--line);border-radius:999px;background:var(--bg-soft);color:var(--ink);padding:7px 10px;font-weight:700;font-size:12px}
+  .status.Delivered{color:var(--teal-ink)}
+  .status.Preparing{color:#8a5b00}
+  .status.On{color:#4a28a6}
+  .worker-note{background:#f5f1ff;border:1px solid #ddd2ff;color:#4a28a6;border-radius:13px;padding:12px 14px;font-size:13px;margin-bottom:22px}
+  @media(max-width:700px){.cards{grid-template-columns:1fr}.wrap{padding:0 16px}.nav-right{width:100%;justify-content:space-between}.panel{padding:18px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="index.html">BHS Bites — Worker</a>
+    <div class="nav-right">
+      <span class="who" id="whoLabel"></span>
+      <a class="back" href="index.html">← Site</a>
+      <button class="btn btn-outline" id="logoutBtn" style="display:none">Log out</button>
+    </div>
+  </div>
+</header>
+<main>
+  <div class="wrap">
+    <section class="state" id="loginBox">
+      <h2>Worker sign in</h2>
+      <p>Use the approved worker account to view and update the order queue.</p>
+      <div class="error" id="authError"></div>
+      <form id="loginForm">
+        <div class="auth-row"><label for="email">Email</label><input id="email" type="email" value="bhs.worker@gmail.com" required autocomplete="email"></div>
+        <div class="auth-row"><label for="password">Password</label><input id="password" type="password" required autocomplete="current-password"></div>
+        <button class="btn btn-primary" style="width:100%" id="loginBtn">Log in</button>
+      </form>
+    </section>
+
+    <section class="state" id="deniedBox" style="display:none">
+      <h2>Worker access only</h2>
+      <p>This account is not approved for the BHS Bites worker order queue.</p>
+      <button class="btn btn-primary" id="deniedLogout">Log out</button>
+    </section>
+
+    <div id="dashboard" style="display:none">
+      <div class="heading">
+        <div><h1>Order queue</h1><div class="sub" style="margin:8px 0 0">See what to prepare, where it goes, and who receives it.</div></div>
+        <span class="live"><i></i> Live updates on</span>
+      </div>
+      <div class="worker-note"><strong>Worker view:</strong> prices, wallet balances, payment activity, student emails, and business totals are intentionally hidden.</div>
+      <div class="cards" id="stats"></div>
+
+      <section class="panel">
+        <div class="heading" style="margin-bottom:14px">
+          <div><h2>New order alerts</h2><div class="sub" style="margin:5px 0 0">Recent orders appear here while this page is open.</div></div>
+          <button class="btn btn-primary" id="notificationsBtn">Enable alerts</button>
+        </div>
+        <div class="notification-list" id="notifications"><div class="empty">No new order alerts yet.</div></div>
+      </section>
+
+      <section class="panel">
+        <h2>Orders to prepare</h2>
+        <div class="sub">Update the status as each order moves through preparation and delivery.</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Order number</th><th>Received</th><th>Recipient</th><th>Deliver to</th><th>Items</th><th>Status</th></tr></thead>
+            <tbody id="ordersBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, collection, onSnapshot, query, orderBy, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDNkDsX3vtuqVhHVTLZ0vCfbu_YvJhYkGQ",
+    authDomain: "bhs-bites.firebaseapp.com",
+    projectId: "bhs-bites",
+    storageBucket: "bhs-bites.firebasestorage.app",
+    messagingSenderId: "147277809054",
+    appId: "1:147277809054:web:be60e42ac2e7ff7101028f",
+    measurementId: "G-LT92WBCN6H"
+  };
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const WORKER_EMAIL = 'bhs.worker@gmail.com';
+  let unsubOrders = null, unsubNotifications = null, notificationsReady = false, allOrders = [];
+
+  const $ = id => document.getElementById(id);
+  const moneylessDate = ts => !ts || !ts.toDate ? 'Just now' : ts.toDate().toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+  const orderNumber = o => o.orderNo || (o.id ? 'BHS-' + o.id.slice(-6).toUpperCase() : 'BHS-ORDER');
+  const itemsText = o => (o.items || []).map(i => i.qty > 1 ? `${i.name} ×${i.qty}` : i.name).join(', ') || 'Order items';
+  const friendlyError = err => {
+    const code = err && err.code || '';
+    if(code.includes('invalid-credential') || code.includes('wrong-password') || code.includes('user-not-found')) return 'Incorrect email or password.';
+    if(code.includes('network-request-failed')) return 'Network error — check your connection and try again.';
+    return err && err.message ? err.message.replace('Firebase: ','') : 'Something went wrong.';
+  };
+  function showError(message){ $('authError').textContent = message; $('authError').classList.add('show'); }
+  function clearError(){ $('authError').textContent = ''; $('authError').classList.remove('show'); }
+  function statusClass(status){ return String(status || 'Preparing').replace(' ',''); }
+
+  function renderStats(){
+    const active = allOrders.filter(o => o.status !== 'Delivered').length;
+    const delivered = allOrders.filter(o => o.status === 'Delivered').length;
+    $('stats').innerHTML = `
+      <div class="stat"><span class="label">Total visible</span><strong>${allOrders.length}</strong></div>
+      <div class="stat"><span class="label">Needs action</span><strong>${active}</strong></div>
+      <div class="stat"><span class="label">Delivered</span><strong>${delivered}</strong></div>`;
+  }
+  function renderOrders(){
+    const body = $('ordersBody');
+    if(!allOrders.length){ body.innerHTML = '<tr><td colspan="6"><div class="empty">No orders yet.</div></td></tr>'; renderStats(); return; }
+    body.innerHTML = allOrders.map(o => {
+      const status = o.status || 'Preparing';
+      const recipient = o.studentName || 'Student';
+      const destination = [o.grade, o.slot].filter(Boolean).join(' · ') || 'Delivery details not set';
+      return `<tr>
+        <td><span class="order-no">${orderNumber(o)}</span><div class="muted">${o.id ? 'Ref '+o.id.slice(-8).toUpperCase() : ''}</div></td>
+        <td>${moneylessDate(o.createdAt)}</td>
+        <td><span class="recipient">${recipient}</span><div class="muted">${o.studentId || 'No student ID'}</div></td>
+        <td>${destination}</td>
+        <td style="white-space:normal;min-width:210px">${itemsText(o)}</td>
+        <td><select class="status ${statusClass(status)}" data-order="${o.id}">
+          <option value="Preparing" ${status==='Preparing'?'selected':''}>Preparing</option>
+          <option value="On the way" ${status==='On the way'?'selected':''}>On the way</option>
+          <option value="Delivered" ${status==='Delivered'?'selected':''}>Delivered</option>
+        </select></td>
+      </tr>`;
+    }).join('');
+    body.querySelectorAll('select[data-order]').forEach(select => {
+      select.addEventListener('change', async () => {
+        select.disabled = true;
+        try { await updateDoc(doc(db,'orders',select.dataset.order), { status: select.value }); }
+        catch(err){ showError('Could not update that order. Check the worker Firestore rules.'); }
+        finally { select.disabled = false; }
+      });
+    });
+    renderStats();
+  }
+  function renderNotifications(rows){
+    const list = $('notifications');
+    if(!rows.length){ list.innerHTML = '<div class="empty">No new order alerts yet.</div>'; return; }
+    list.innerHTML = rows.slice(0,12).map(n => `<div class="notification">
+      <div><strong>${orderNumber(n)} · ${n.studentName || 'New order'}</strong><small>${itemsText(n)} · ${n.studentId || 'No student ID'} · ${moneylessDate(n.createdAt)}</small></div>
+      <strong>${n.grade || 'Delivery'}${n.slot ? ' · '+n.slot : ''}</strong>
+    </div>`).join('');
+  }
+  function teardown(){
+    if(unsubOrders){ unsubOrders(); unsubOrders = null; }
+    if(unsubNotifications){ unsubNotifications(); unsubNotifications = null; }
+    allOrders = []; notificationsReady = false; renderStats(); renderNotifications([]);
+  }
+  function doLogout(){ teardown(); signOut(auth); }
+
+  $('loginForm').addEventListener('submit', async e => {
+    e.preventDefault(); clearError();
+    const btn = $('loginBtn'); btn.disabled = true; btn.textContent = 'Logging in…';
+    try { await signInWithEmailAndPassword(auth, $('email').value.trim(), $('password').value); }
+    catch(err){ showError(friendlyError(err)); }
+    finally { btn.disabled = false; btn.textContent = 'Log in'; }
+  });
+  $('logoutBtn').addEventListener('click', doLogout);
+  $('deniedLogout').addEventListener('click', doLogout);
+  $('notificationsBtn').addEventListener('click', async () => {
+    if(!('Notification' in window)){ showError('Desktop notifications are not supported by this browser.'); return; }
+    const permission = await Notification.requestPermission();
+    $('notificationsBtn').textContent = permission === 'granted' ? 'Alerts enabled' : 'Alerts blocked';
+  });
+
+  onAuthStateChanged(auth, user => {
+    teardown();
+    if(!user){
+      $('loginBox').style.display = ''; $('deniedBox').style.display = 'none'; $('dashboard').style.display = 'none'; $('logoutBtn').style.display = 'none'; $('whoLabel').textContent = '';
+      return;
+    }
+    if((user.email || '').toLowerCase() !== WORKER_EMAIL){
+      $('loginBox').style.display = 'none'; $('deniedBox').style.display = ''; $('dashboard').style.display = 'none'; $('logoutBtn').style.display = ''; $('whoLabel').textContent = user.email || '';
+      return;
+    }
+    $('loginBox').style.display = 'none'; $('deniedBox').style.display = 'none'; $('dashboard').style.display = ''; $('logoutBtn').style.display = ''; $('whoLabel').textContent = user.email;
+    unsubOrders = onSnapshot(query(collection(db,'orders'), orderBy('createdAt','desc')), snap => {
+      allOrders = snap.docs.map(d => ({id:d.id,...d.data()})); renderOrders();
+    }, () => showError('Orders could not be loaded. Publish the included Firestore rules and try again.'));
+    unsubNotifications = onSnapshot(query(collection(db,'notifications'), orderBy('createdAt','desc')), snap => {
+      const rows = snap.docs.map(d => ({id:d.id,...d.data()})); renderNotifications(rows);
+      if(notificationsReady && 'Notification' in window && Notification.permission === 'granted'){
+        snap.docChanges().filter(c => c.type === 'added').forEach(c => {
+          const n = c.doc.data(); new Notification('New BHS Bites order', {body:`${orderNumber(n)} for ${n.studentName || 'a recipient'}`});
+        });
+      }
+      notificationsReady = true;
+    }, () => renderNotifications([]));
+  });
+</script>
+</body>
+</html>
