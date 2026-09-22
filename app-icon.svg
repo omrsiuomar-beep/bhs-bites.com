@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="BHS Bites app icon">
-  <rect width="512" height="512" rx="112" fill="#3b0919"/>
-  <circle cx="256" cy="196" r="112" fill="#fcd84b"/>
-  <path d="M167 212c22-69 156-69 178 0" fill="none" stroke="#3b0919" stroke-width="30" stroke-linecap="round"/>
-  <path d="M180 255h152c0 65-34 103-76 103s-76-38-76-103Z" fill="#fdf3d9" stroke="#3b0919" stroke-width="22" stroke-linejoin="round"/>
-  <circle cx="212" cy="178" r="13" fill="#3b0919"/>
-  <circle cx="300" cy="178" r="13" fill="#3b0919"/>
-  <text x="256" y="428" text-anchor="middle" font-family="Arial, sans-serif" font-size="54" font-weight="800" fill="#fdf3d9">BHS BITES</text>
-</svg>
